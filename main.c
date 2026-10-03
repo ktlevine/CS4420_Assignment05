@@ -124,6 +124,13 @@ int main(int argc, char *argv[])
         for (int i = 0; i < numberOfProcesses; i++) {
             printf("%-5d %-12d %-10d %-8d %-12d %-12d\n", processes[i].pid, processes[i].arrival, processes[i].start, processes[i].end, processes[i].running, processes[i].waiting);
         }
+        // print the avg waiting time (as a double)
+        double avgWaitingTime = 0;
+        for (int i = 0; i < numberOfProcesses; i++) {
+            avgWaitingTime += processes[i].waiting;
+        }
+        avgWaitingTime /= numberOfProcesses;
+        printf("Average Waiting Time: %.2f\n", avgWaitingTime);
             
     } else if (type == 2 && quantum > 0) { // RR
         printf("\033[1mYou have chosen the RR Algorithm\033[0m\n------------------------------------------------\n");
@@ -168,6 +175,13 @@ int main(int argc, char *argv[])
         for (int i = 0; i < numberOfProcesses; i++) {
             printf("%-5d %-12d %-10d %-8d %-12d %-12d\n", processes[i].pid, processes[i].arrival, processes[i].start, processes[i].end, processes[i].running, processes[i].waiting);
         }
+        // print the avg waiting time (as a double)
+        double avgWaitingTime = 0;
+        for (int i = 0; i < numberOfProcesses; i++) {
+            avgWaitingTime += processes[i].waiting;
+        }
+        avgWaitingTime /= numberOfProcesses;
+        printf("Average Waiting Time: %.2f\n", avgWaitingTime);
 
     } else if (type == 3) { // SJF
         printf("\033[1mYou have chosen the SJF Algorithm\033[0m\n------------------------------------------------\n");
@@ -212,6 +226,13 @@ int main(int argc, char *argv[])
         for (int i = 0; i < numberOfProcesses; i++) {
             printf("%-5d %-12d %-10d %-8d %-12d %-12d\n", processes[i].pid, processes[i].arrival, processes[i].start, processes[i].end, processes[i].running, processes[i].waiting); 
         }
+        // print the avg waiting time (as a double)
+        double avgWaitingTime = 0;
+        for (int i = 0; i < numberOfProcesses; i++) {
+            avgWaitingTime += processes[i].waiting;
+        }
+        avgWaitingTime /= numberOfProcesses;
+        printf("Average Waiting Time: %.2f\n", avgWaitingTime);
     } else if (argc < 3 || quantum == 0) { // check to ensure the input wont crash the program
         printf("Invalid entry. Please enter in this format: <input_file> <algorithm> [quantum (only if needed)]\n");
     }
