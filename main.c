@@ -16,8 +16,11 @@ typedef struct {
     int end;
     int running;
     int waiting;
+    int done;
+    int shortest;
 } Process;
 
+// called this print file but more so it sets up the process array with the data from the file
 void printFile(FILE *fp, Process processes[], int numberOfProcesses) {
     // read for the ammount of processes 
     for (int i = 0; i < numberOfProcesses; i++)
@@ -35,6 +38,9 @@ void printFile(FILE *fp, Process processes[], int numberOfProcesses) {
         processes[i].start = 0;
         processes[i].end = 0;
         processes[i].waiting = 0;
+        processes[i].done = 0;
+        processes[i].shortest = 0;
+        processes[i].running = 0;
     }
 }
 
@@ -72,17 +78,18 @@ int main(int argc, char *argv[])
         return 1;
     }
     fscanf(fp, "%d", &numberOfProcesses);
-    Process processes[numberOfProcesses]; // array for the processes
-    // sort by arrival time before doing anything
+
+    Process processes[numberOfProcesses];
+
+    printf("The given processes are:\n");
+    printFile(fp, processes, numberOfProcesses);
+
     sortByArrival(processes, numberOfProcesses);
 
 
     // run the simulation
     if (type == 1) { // FCFS
         printf("\033[1mYou have chosen the FCFS Algorithm\033[0m\n------------------------------------------------\n");
-        printf("The given processes are:\n");
-        printFile(fp, processes, numberOfProcesses);
-        printf("------------------------------------------------\n");
         printf("\033[3mDebugging info:\033[0m\n");
         clock = 0;
         for (int i = 0; i < numberOfProcesses; i++) {
@@ -109,9 +116,6 @@ int main(int argc, char *argv[])
             
     } else if (type == 2) { // RR
         printf("\033[1mYou have chosen the RR Algorithm\033[0m\n------------------------------------------------\n");
-        printf("The given processes are:\n");
-        printFile(fp, processes, numberOfProcesses);
-        printf("------------------------------------------------\n");
         printf("\033[3mDebugging info:\033[0m\n");
 
         // print all the results
@@ -124,10 +128,39 @@ int main(int argc, char *argv[])
 
     } else if (type == 3) { // SJF
         printf("\033[1mYou have chosen the SJF Algorithm\033[0m\n------------------------------------------------\n");
-        printf("The given processes are:\n");
-        printFile(fp, processes, numberOfProcesses);
-        printf("------------------------------------------------\n");
         printf("\033[3mDebugging info:\033[0m\n");
+        clock = 0;
+        int completed = 0;
+        int shortest = 0;
+        int shortestIndex = -1;
+        while (completed < numberOfProcesses){
+            for (int i = 0; i < numberOfProcesses; i++) {
+            if (processes[i].arrival <= clock && !processes[i].done) { // check if the process is ready to be run
+                if (processes[i].burst < shortest || shortest == 0) {
+                    shortest = processes[i].burst;
+                    // store the index of the shortest job
+                    shortestIndex = i;
+                }
+            }
+        }
+        // if nothing is ready to be run, increment the clock and try again
+        if (shortestIndex == -1) {
+            clock++;
+            continue;
+        }
+        // do the shortest process
+        processes[shortestIndex].start = clock;
+        processes[shortestIndex].end = processes[shortestIndex].start + processes[shortestIndex].burst;
+        processes[shortestIndex].waiting = processes[shortestIndex].start - processes[shortestIndex].arrival;
+        processes[shortestIndex].running = processes[shortestIndex].end - processes[shortestIndex].start;
+        processes[shortestIndex].done = 1;
+        clock = processes[shortestIndex].end;
+        // print for debugging
+        printf("Process %d: Start: %d End: %d Waiting: %d Running: %d\n", processes[shortestIndex].pid, processes[shortestIndex].start, processes[shortestIndex].end, processes[shortestIndex].waiting, processes[shortestIndex].running);
+        completed++;
+        shortest = 0;
+        shortestIndex = -1;
+        }
 
         // print all the results
         printf("------------------------------------------------\n");
