@@ -7,6 +7,23 @@ int numberOfProcesses = 0; // first line of file
 int type = 0; // what algorithm
 int clock = 0; // fake clock
 
+void printFile(FILE *fp) {
+
+    fscanf(fp, "%d", &numberOfProcesses);
+
+    for (int i = 0; i < numberOfProcesses; i++)
+    {
+        int pid;
+        int arrival;
+        int burst;
+
+        fscanf(fp, "%d %d %d", &pid, &arrival, &burst);
+        printf("PID: %d Arrival: %d Burst: %d\n", pid, arrival, burst);
+        
+    }
+    fclose(fp);
+}
+
 int main(int argc, char *argv[])
 {
     // check the command line input
@@ -27,34 +44,29 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    fscanf(fp, "%d", &numberOfProcesses);
-
-    for (int i = 0; i < numberOfProcesses; i++)
-    {
-        int pid;
-        int arrival;
-        int burst;
-
-        fscanf(fp, "%d %d %d", &pid, &arrival, &burst);
-
-        printf("PID: %d Arrival: %d Burst: %d\n", pid, arrival, burst);
-    }
-    fclose(fp);
-
 
     // run the simulation
-    while (true) {
+    while (clock < 500) {
         
         if (type == 1) {
+            printf("You have chosen the FCFS Algorithm\n");
+            printf("The given processes are:\n");
+            printFile(fp);
             
         } else if (type == 2) {
+            printf("You have chosen the RR Algorithm\n");
+            printf("The given processes are:\n");
+            printFile(fp);
 
         } else if (type == 3) {
-
+            printf("You have chosen the SJF Algorithm\n");
+            printf("The given processes are:\n");
+            printFile(fp);
         }
 
   
-    clock++;
+    clock = 600;
+
     }
 
 
