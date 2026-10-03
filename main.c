@@ -14,6 +14,7 @@ typedef struct {
     int burst;
     int start;
     int end;
+    int running;
     int waiting;
 } Process;
 
@@ -95,6 +96,15 @@ int main(int argc, char *argv[])
             processes[i].end = clock;
             processes[i].waiting = processes[i].start - processes[i].arrival;
             printf("Process %d: Start: %d End: %d Waiting: %d\n", processes[i].pid, processes[i].start, processes[i].end, processes[i].waiting);
+            int running_time = processes[i].end - processes[i].start;
+            processes[i].running = running_time;
+        }
+        // print all the results
+        printf("------------------------------------------------\n");
+        printf("\033[1mFinal FCFS Results:\033[0m\n");
+        printf("%-5s %-12s %-10s %-8s %-12s %-12s\n", "PID", "Arrival", "Start", "End", "Running", "Waiting");
+        for (int i = 0; i < numberOfProcesses; i++) {
+            printf("%-5d %-12d %-10d %-8d %-12d %-12d\n", processes[i].pid, processes[i].arrival, processes[i].start, processes[i].end, processes[i].running, processes[i].waiting);
         }
             
     } else if (type == 2) { // RR
@@ -104,12 +114,28 @@ int main(int argc, char *argv[])
         printf("------------------------------------------------\n");
         printf("\033[3mDebugging info:\033[0m\n");
 
+        // print all the results
+        printf("------------------------------------------------\n");
+        printf("\033[1mFinal FCFS Results:\033[0m\n");
+        printf("%-5s %-12s %-10s %-8s %-12s %-12s\n", "PID", "Arrival", "Start", "End", "Running", "Waiting");
+        for (int i = 0; i < numberOfProcesses; i++) {
+            printf("%-5d %-12d %-10d %-8d %-12d %-12d\n", processes[i].pid, processes[i].arrival, processes[i].start, processes[i].end, processes[i].running, processes[i].waiting); 
+        }
+
     } else if (type == 3) { // SJF
         printf("\033[1mYou have chosen the SJF Algorithm\033[0m\n------------------------------------------------\n");
         printf("The given processes are:\n");
         printFile(fp, processes, numberOfProcesses);
         printf("------------------------------------------------\n");
         printf("\033[3mDebugging info:\033[0m\n");
+
+        // print all the results
+        printf("------------------------------------------------\n");
+        printf("\033[1mFinal SJF Results:\033[0m\n");
+        printf("%-5s %-12s %-10s %-8s %-12s %-12s\n", "PID", "Arrival", "Start", "End", "Running", "Waiting");
+        for (int i = 0; i < numberOfProcesses; i++) {
+            printf("%-5d %-12d %-10d %-8d %-12d %-12d\n", processes[i].pid, processes[i].arrival, processes[i].start, processes[i].end, processes[i].running, processes[i].waiting); 
+        }
     }
 
     // end program
