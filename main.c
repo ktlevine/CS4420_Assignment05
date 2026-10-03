@@ -5,7 +5,7 @@
 
 int numberOfProcesses = 0; // first line of file
 int type = 0; // what algorithm
-int clock = 0; // fake clock
+int clock = 0; // clock
 
 // struct for each process
 typedef struct {
@@ -18,6 +18,8 @@ typedef struct {
     int waiting;
     int done;
     int shortest;
+    int remaining;
+    int round;
 } Process;
 
 // called this print file but more so it sets up the process array with the data from the file
@@ -41,6 +43,8 @@ void printFile(FILE *fp, Process processes[], int numberOfProcesses) {
         processes[i].done = 0;
         processes[i].shortest = 0;
         processes[i].running = 0;
+        processes[i].remaining = burst;
+        processes[i].round = 0;
     }
 }
 
@@ -60,6 +64,13 @@ void sortByArrival(Process processes[], int numberOfProcesses)
 
 int main(int argc, char *argv[])
 {
+    // RR check
+    int quantum = 0;
+    if (argc >= 4) {
+        quantum = atoi(argv[3]);
+    }
+    //printf("Quantum: %d\n", quantum);
+
     // check the command line input
     if (strcmp(argv[2], "FCFS") == 0) {
     type = 1; // FCFS
@@ -86,7 +97,7 @@ int main(int argc, char *argv[])
 
     sortByArrival(processes, numberOfProcesses);
 
-
+    printf("\n");
     // run the simulation
     if (type == 1) { // FCFS
         printf("\033[1mYou have chosen the FCFS Algorithm\033[0m\n------------------------------------------------\n");
@@ -99,7 +110,7 @@ int main(int argc, char *argv[])
             }
             clock = processes[i].start; // update the clock to the start time
 
-            clock += processes[i].burst; // increment the fake clock 
+            clock += processes[i].burst; // increment the clock 
             processes[i].end = clock;
             processes[i].waiting = processes[i].start - processes[i].arrival;
             printf("Process %d: Start: %d End: %d Waiting: %d\n", processes[i].pid, processes[i].start, processes[i].end, processes[i].waiting);
@@ -114,16 +125,48 @@ int main(int argc, char *argv[])
             printf("%-5d %-12d %-10d %-8d %-12d %-12d\n", processes[i].pid, processes[i].arrival, processes[i].start, processes[i].end, processes[i].running, processes[i].waiting);
         }
             
-    } else if (type == 2) { // RR
+    } else if (type == 2 && quantum > 0) { // RR
         printf("\033[1mYou have chosen the RR Algorithm\033[0m\n------------------------------------------------\n");
         printf("\033[3mDebugging info:\033[0m\n");
+        printf("Quantum: %d\n", quantum);
+        clock = 0;
+        int completed = 0;
+        while (completed < numberOfProcesses){ // make sure it loops till they are all done
+            for (int i = 0; i < numberOfProcesses; i++) {
+                if (processes[i].remaining > 0 && processes[i].arrival <= clock) {
+                    if (processes[i].round == 0) {
+                        processes[i].round++;
+                        processes[i].start = clock; // update the start time only on first round
+                    }
 
+                    // record the start time of this quantum run
+                    int anotherStart = clock;
+
+                    if (processes[i].remaining > quantum) { // if time remaining is bigger than quantum, minus the full quantum amount from remaining time
+                        processes[i].remaining -= quantum;
+                        clock += quantum;
+                    } else { // otherwise, the process should complete within the remaining time
+                        clock += processes[i].remaining;
+                        processes[i].remaining = 0;
+                    }
+                    processes[i].end = clock;
+                    if (processes[i].remaining == 0) {
+                        processes[i].end = clock;
+                        // only calculate the waiting time once the process is done
+                        processes[i].waiting = processes[i].end - processes[i].arrival - processes[i].burst;
+                        completed++;
+                    }
+                    printf("Process %d: Start: %d End: %d Waiting: %d\n", processes[i].pid, anotherStart, processes[i].end, processes[i].waiting);
+                    processes[i].running = processes[i].burst;
+                }
+            }
+        }
         // print all the results
         printf("------------------------------------------------\n");
-        printf("\033[1mFinal FCFS Results:\033[0m\n");
+        printf("\033[1mFinal RR Results:\033[0m\n");
         printf("%-5s %-12s %-10s %-8s %-12s %-12s\n", "PID", "Arrival", "Start", "End", "Running", "Waiting");
         for (int i = 0; i < numberOfProcesses; i++) {
-            printf("%-5d %-12d %-10d %-8d %-12d %-12d\n", processes[i].pid, processes[i].arrival, processes[i].start, processes[i].end, processes[i].running, processes[i].waiting); 
+            printf("%-5d %-12d %-10d %-8d %-12d %-12d\n", processes[i].pid, processes[i].arrival, processes[i].start, processes[i].end, processes[i].running, processes[i].waiting);
         }
 
     } else if (type == 3) { // SJF
@@ -169,6 +212,8 @@ int main(int argc, char *argv[])
         for (int i = 0; i < numberOfProcesses; i++) {
             printf("%-5d %-12d %-10d %-8d %-12d %-12d\n", processes[i].pid, processes[i].arrival, processes[i].start, processes[i].end, processes[i].running, processes[i].waiting); 
         }
+    } else if (argc < 3 || quantum == 0) { // check to ensure the input wont crash the program
+        printf("Invalid entry. Please enter in this format: <input_file> <algorithm> [quantum (only if needed)]\n");
     }
 
     // end program
